@@ -1,0 +1,36 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: event-reminder
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yml
+  jpa:
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+      hibernate.type: true
+      hibernate.use_sql_comments: true
+
+telegram:
+  bot-username: ${TELEGRAM_BOT_USERNAME}
+  bot-token: ${TELEGRAM_BOT_TOKEN}
+
+bot:
+  access:
+    password: ${BOT_ACCESS_PASSWORD}
+
+
+scheduler:
+  notification-cron: "0 30 8 * * *" # каждый день в 9:00 утра
+  #notification-cron: "0 26 19 * * *" # тест
+
+logging:
+  level:
+    org.hibernate.type.descriptor.sql: TRACE
+    org.springframework: INFO
