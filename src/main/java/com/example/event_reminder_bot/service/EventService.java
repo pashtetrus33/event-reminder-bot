@@ -14,4 +14,6 @@ public interface EventService {
     List<Event> getUpcomingEvents(int daysFromNow);
 
     void importEventsFromExcel(byte[] excelBytes);
+
+    List<Event> getAllEventsFromDate(LocalDate now);
 }

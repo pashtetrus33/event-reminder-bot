@@ -71,4 +71,9 @@ public class EventServiceImpl implements EventService {
             throw new RuntimeException("Ошибка при импорте Excel-файла: " + e.getMessage(), e);
         }
     }
+
+    @Override
+    public List<Event> getAllEventsFromDate(LocalDate date) {
+        return eventRepository.findAllByEventDateGreaterThanEqualOrderByEventDateAsc(date);
+    }
 }

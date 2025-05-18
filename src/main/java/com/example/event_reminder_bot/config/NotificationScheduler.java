@@ -7,7 +7,8 @@ import com.example.event_reminder_bot.service.EventService;
 import com.example.event_reminder_bot.service.TelegramUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
@@ -22,14 +23,22 @@ public class NotificationScheduler {
 
     private final EventService eventService;
     private final TelegramUserService telegramUserService;
-    private final EventReminderBot telegramBot;
+
+    private EventReminderBot telegramBot;
+
+    @Lazy
+    @Autowired
+    public void setTelegramBot(EventReminderBot telegramBot) {
+        this.telegramBot = telegramBot;
+    }
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private final SchedulerProperties schedulerProperties;
 
-    @Scheduled(cron = "#{@schedulerProperties.notificationCron}")
+
     public void sendEventNotifications() {
         log.info("⏰ Запуск планировщика уведомлений...");
-        notifyUsers(3); // за 3 дня
+        notifyUsers(schedulerProperties.getDays());
         notifyUsers(0); // сегодня
     }
 
@@ -60,15 +69,17 @@ public class NotificationScheduler {
 
         List<TelegramUser> users = telegramUserService.findAll();
         for (TelegramUser user : users) {
-            SendMessage message = SendMessage.builder()
-                    .chatId(user.getTelegramId().toString())
-                    .text(messageBuilder.toString())
-                    .parseMode("HTML")
-                    .build();
-            try {
-                telegramBot.execute(message);
-            } catch (Exception e) {
-                log.error("Не удалось отправить уведомление пользователю {}: {}", user.getTelegramId(), e.getMessage());
+            if (user.isHasAccess()) {
+                SendMessage message = SendMessage.builder()
+                        .chatId(user.getTelegramId().toString())
+                        .text(messageBuilder.toString())
+                        .parseMode("HTML")
+                        .build();
+                try {
+                    telegramBot.execute(message);
+                } catch (Exception e) {
+                    log.error("Не удалось отправить уведомление пользователю {}: {}", user.getTelegramId(), e.getMessage());
+                }
             }
         }
     }

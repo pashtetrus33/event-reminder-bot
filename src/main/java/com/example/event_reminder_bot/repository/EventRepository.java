@@ -15,4 +15,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByEventDateAndIsActive(LocalDate date, boolean isActive);
 
     boolean existsByEventDateAndDescription(LocalDate date, String description);
+
+    List<Event> findAllByEventDateGreaterThanEqualOrderByEventDateAsc(LocalDate date);
 }
