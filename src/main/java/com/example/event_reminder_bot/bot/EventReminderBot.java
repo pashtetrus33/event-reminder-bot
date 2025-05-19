@@ -302,7 +302,7 @@ public class EventReminderBot extends TelegramLongPollingBot {
         sendMessage(chatId, "Введите пароль для доступа:");
     }
 
-    private void handleDocument(Document document, Long chatId) {
+    public void handleDocument(Document document, Long chatId) {
         if (!document.getFileName().endsWith(".xlsx")) {
             sendMessage(chatId, "Пожалуйста, отправьте Excel файл с расширением .xlsx.");
             return;
@@ -327,7 +327,27 @@ public class EventReminderBot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendMessage(Long chatId, String text) {
+    public void handleDocument(InputStream inputStream, String fileName, Long chatId) {
+        if (!fileName.endsWith(".xlsx")) {
+            sendMessage(chatId, "Пожалуйста, отправьте Excel файл с расширением .xlsx.");
+            return;
+        }
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            inputStream.transferTo(baos);
+            byte[] excelBytes = baos.toByteArray();
+
+            eventService.importEventsFromExcel(excelBytes);
+
+            sendMessage(chatId, "Файл успешно обработан. Мероприятия добавлены.");
+        } catch (Exception e) {
+            log.error("Ошибка при обработке документа: {}", e.getMessage(), e);
+            sendMessage(chatId, "Произошла ошибка при обработке файла.");
+        }
+    }
+
+
+    public void sendMessage(Long chatId, String text) {
         SendMessage message = SendMessage.builder()
                 .chatId(chatId.toString())
                 .text(text)

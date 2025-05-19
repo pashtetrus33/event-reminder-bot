@@ -28,6 +28,12 @@ bot:
 
 scheduler:
   days: 3
+  cron-expression: "0 0 9,12,17,18 * * *"
+
+google:
+  sheets:
+    url: "https://docs.google.com/spreadsheets/d/1yDE8tzG1viiAq5cR25XT4Vgu96WkSHtSaWMVc9xfoV0/export?format=xlsx"
+
 
 logging:
   level:

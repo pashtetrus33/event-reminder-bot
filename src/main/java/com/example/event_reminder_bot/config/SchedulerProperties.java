@@ -11,4 +11,5 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "scheduler")
 public class SchedulerProperties {
     private int days;
+    private String cronExpression;
 }
