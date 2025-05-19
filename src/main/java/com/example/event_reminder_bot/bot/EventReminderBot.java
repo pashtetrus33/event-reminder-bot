@@ -13,11 +13,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatAdministrators;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -46,6 +49,30 @@ public class EventReminderBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+
+        if (update.hasChannelPost()) {
+            Long channelId = update.getChannelPost().getChatId();
+
+            try {
+                if (botIsAdmin(channelId)) {
+                    //sendMessage(channelId, "✅ Bot is admin in channel " + channelId);
+
+                    TelegramUser channel = TelegramUser.builder()
+                            .isHasAccess(true)
+                            .isBot(false)
+                            .telegramId(channelId)
+                            .firstName(update.getChannelPost().getChat().getTitle())
+                            .username("Channel")
+                            .lastName("channel")
+                            .build();
+
+                    userService.registerOrUpdateUser(channel);
+                }
+            } catch (TelegramApiException e) {
+                log.error("❌ Bot is not admin in channel {}", channelId, e);
+            }
+        }
+
         if (!update.hasMessage()) return;
 
         Message message = update.getMessage();
@@ -277,7 +304,7 @@ public class EventReminderBot extends TelegramLongPollingBot {
                 user.setHasAccess(true);
                 userService.registerOrUpdateUser(user);
                 sendMessage(chatId, "Привет, " + user.getFirstName() +
-                                    "! Вы подписаны на уведомления о мероприятиях.");
+                        "! Вы подписаны на уведомления о мероприятиях.");
             } else {
                 sendMessage(chatId, "Неверный пароль. Попробуйте еще раз.");
             }
@@ -385,5 +412,14 @@ public class EventReminderBot extends TelegramLongPollingBot {
                 """;
 
         sendMessage(chatId, helpText);
+    }
+
+    private boolean botIsAdmin(Long chatId) throws TelegramApiException {
+        GetChatAdministrators admins = new GetChatAdministrators(chatId.toString());
+        List<ChatMember> adminsList = execute(admins);
+
+        String botUsername = getBotUsername(); // Получаем @username бота
+        return adminsList.stream()
+                .anyMatch(member -> member.getUser().getUserName().equals(botUsername));
     }
 }
