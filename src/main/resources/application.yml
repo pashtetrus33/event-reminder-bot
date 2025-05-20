@@ -28,7 +28,6 @@ bot:
 
 scheduler:
   days: 3
-  cron-expression: "0 0 9,12,17,19 * * *"
 
 google:
   sheets:

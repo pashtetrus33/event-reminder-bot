@@ -3,7 +3,6 @@ package com.example.event_reminder_bot.service.impl;
 import com.example.event_reminder_bot.config.NotificationScheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;

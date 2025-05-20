@@ -23,7 +23,7 @@ public class NotificationScheduler {
 
     private final EventService eventService;
     private final TelegramUserService telegramUserService;
-
+    private final DocumentProcessor documentProcessor;
     private EventReminderBot telegramBot;
 
     @Lazy
@@ -37,6 +37,10 @@ public class NotificationScheduler {
 
 
     public void sendEventNotifications() {
+        log.info("⏰ Запуск обработки файла...");
+        documentProcessor.processDocument();
+
+
         log.info("⏰ Запуск планировщика уведомлений...");
         notifyUsers(schedulerProperties.getDays());
         notifyUsers(0); // сегодня
