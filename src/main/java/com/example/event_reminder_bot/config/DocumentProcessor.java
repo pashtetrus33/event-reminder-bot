@@ -3,6 +3,8 @@ package com.example.event_reminder_bot.config;
 import com.example.event_reminder_bot.bot.EventReminderBot;
 import com.example.event_reminder_bot.service.impl.GoogleSheetsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -14,8 +16,14 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class DocumentProcessor {
 
-    private final EventReminderBot bot;
+    private EventReminderBot bot;
     private final GoogleSheetsService googleSheetsService;
+
+    @Lazy
+    @Autowired
+    public void setTelegramBot(EventReminderBot telegramBot) {
+        this.bot = telegramBot;
+    }
 
     public void processDocument() {
         Long ADMIN_CHAT_ID = 1293578282L;
